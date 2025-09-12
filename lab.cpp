@@ -4,17 +4,30 @@
 #include <limits>
 using namespace std;
 
-struct Node {
+class Node {
+private:
     string phone;
     string adres;
     float square;
     Node* next;
 
+public:
     Node(const string& phone, const string& adres, float square)
         : phone(phone), adres(adres), square(square), next(nullptr) {}
+
+    // --- getters & setters ---
+    string getPhone() const { return phone; }
+    string getAdres() const { return adres; }
+    float getSquare() const { return square; }
+    Node* getNext() const { return next; }
+
+    void setPhone(const string& p) { phone = p; }
+    void setAdres(const string& a) { adres = a; }
+    void setSquare(float s) { square = s; }
+    void setNext(Node* n) { next = n; }
 };
 
-// Добавление узла в конец
+// --- Функции работы со списком ---
 void append(Node*& head, const string& phone, const string& adres, float square) {
     Node* newNode = new Node(phone, adres, square);
     if (!head) {
@@ -22,22 +35,20 @@ void append(Node*& head, const string& phone, const string& adres, float square)
         return;
     }
     Node* temp = head;
-    while (temp->next) temp = temp->next;
-    temp->next = newNode;
+    while (temp->getNext()) temp = temp->getNext();
+    temp->setNext(newNode);
 }
 
-// Вывод списка
 void printList(Node* head) {
     Node* temp = head;
     while (temp) {
-        cout << "Phone: " << temp->phone
-             << ", Adres: " << temp->adres
-             << ", Square: " << temp->square << endl;
-        temp = temp->next;
+        cout << "Phone: " << temp->getPhone()
+             << ", Adres: " << temp->getAdres()
+             << ", Square: " << temp->getSquare() << endl;
+        temp = temp->getNext();
     }
 }
 
-// Запись в текстовый файл
 void writeToTextFile(Node* head) {
     ofstream file("list.txt");
     if (!file) {
@@ -46,13 +57,12 @@ void writeToTextFile(Node* head) {
     }
     Node* temp = head;
     while (temp) {
-        file << temp->phone << ";" << temp->adres << ";" << temp->square << "\n";
-        temp = temp->next;
+        file << temp->getPhone() << ";" << temp->getAdres() << ";" << temp->getSquare() << "\n";
+        temp = temp->getNext();
     }
     cout << "List is written to text.\n";
 }
 
-// Чтение из текстового файла
 void readFromTextFile(Node*& head) {
     ifstream file("list.txt");
     if (!file) {
@@ -70,17 +80,15 @@ void readFromTextFile(Node*& head) {
     cout << "List is read from text.\n";
 }
 
-// Освобождение памяти
 void freeList(Node*& head) {
     while (head) {
         Node* temp = head;
-        head = head->next;
+        head = head->getNext();
         delete temp;
     }
     cout << "Memory freed\n";
 }
 
-// Ввод элементов
 void enterElements(Node*& head) {
     int n;
     cout << "Enter number of elements: ";
@@ -100,7 +108,6 @@ void enterElements(Node*& head) {
     }
 }
 
-// Поиск по телефону
 void searchForElement(Node* head) {
     string phone;
     cout << "Enter phone: ";
@@ -108,55 +115,55 @@ void searchForElement(Node* head) {
 
     Node* temp = head;
     while (temp) {
-        if (temp->phone == phone) {
-            cout << "Found: " << temp->phone << ", " << temp->adres
-                 << ", " << temp->square << endl;
+        if (temp->getPhone() == phone) {
+            cout << "Found: " << temp->getPhone() << ", " << temp->getAdres()
+                 << ", " << temp->getSquare() << endl;
             return;
         }
-        temp = temp->next;
+        temp = temp->getNext();
     }
     cout << "Element not found.\n";
 }
 
-// Сортировка по телефону
 void sortList(Node*& head) {
-    if (!head || !head->next) return;
-    for (Node* i = head; i; i = i->next) {
-        for (Node* j = i->next; j; j = j->next) {
-            if (i->phone > j->phone) {
-                swap(i->phone, j->phone);
-                swap(i->adres, j->adres);
-                swap(i->square, j->square);
+    if (!head || !head->getNext()) return;
+    for (Node* i = head; i; i = i->getNext()) {
+        for (Node* j = i->getNext(); j; j = j->getNext()) {
+            if (i->getPhone() > j->getPhone()) {
+                string p = i->getPhone(); i->setPhone(j->getPhone()); j->setPhone(p);
+                string a = i->getAdres(); i->setAdres(j->getAdres()); j->setAdres(a);
+                float s = i->getSquare(); i->setSquare(j->getSquare()); j->setSquare(s);
             }
         }
     }
     cout << "List sorted.\n";
 }
 
-// Редактирование элемента
 void editElement(Node* head) {
     string phone;
     cout << "Enter phone to edit: ";
     cin >> phone;
     Node* temp = head;
     while (temp) {
-        if (temp->phone == phone) {
+        if (temp->getPhone() == phone) {
             cout << "New phone: ";
-            cin >> temp->phone;
+            string newPhone; cin >> newPhone;
+            temp->setPhone(newPhone);
             cin.ignore();
             cout << "New adres: ";
-            getline(cin, temp->adres);
+            string newAdres; getline(cin, newAdres);
+            temp->setAdres(newAdres);
             cout << "New square: ";
-            cin >> temp->square;
+            float sq; cin >> sq;
+            temp->setSquare(sq);
             cout << "Edited.\n";
             return;
         }
-        temp = temp->next;
+        temp = temp->getNext();
     }
     cout << "Not found.\n";
 }
 
-// Добавление в конец
 void addToEnd(Node*& head) {
     string phone, adres;
     float square;
@@ -170,7 +177,6 @@ void addToEnd(Node*& head) {
     append(head, phone, adres, square);
 }
 
-// Удаление
 void deleteElement(Node*& head) {
     string phone;
     cout << "Enter phone to delete: ";
@@ -178,21 +184,20 @@ void deleteElement(Node*& head) {
 
     Node* temp = head;
     Node* prev = nullptr;
-    while (temp && temp->phone != phone) {
+    while (temp && temp->getPhone() != phone) {
         prev = temp;
-        temp = temp->next;
+        temp = temp->getNext();
     }
     if (!temp) {
         cout << "Not found.\n";
         return;
     }
-    if (!prev) head = temp->next;
-    else prev->next = temp->next;
+    if (!prev) head = temp->getNext();
+    else prev->setNext(temp->getNext());
     delete temp;
     cout << "Deleted.\n";
 }
 
-// Вставка по позиции
 void insertElement(Node*& head) {
     string phone, adres;
     float square;
@@ -209,22 +214,21 @@ void insertElement(Node*& head) {
 
     Node* newNode = new Node(phone, adres, square);
     if (pos == 0) {
-        newNode->next = head;
+        newNode->setNext(head);
         head = newNode;
         return;
     }
     Node* temp = head;
-    for (int i = 0; temp && i < pos - 1; i++) temp = temp->next;
+    for (int i = 0; temp && i < pos - 1; i++) temp = temp->getNext();
     if (!temp) {
         cout << "Wrong position\n";
         delete newNode;
         return;
     }
-    newNode->next = temp->next;
-    temp->next = newNode;
+    newNode->setNext(temp->getNext());
+    temp->setNext(newNode);
 }
 
-// Чтение из бинарного файла
 void readFromBinaryFile(Node*& head) {
     ifstream file("list.bin", ios::binary);
     if (!file) {
@@ -247,7 +251,6 @@ void readFromBinaryFile(Node*& head) {
     cout << "Read from binary.\n";
 }
 
-// Запись в бинарный файл
 void writeToBinaryFile(Node* head) {
     ofstream file("list.bin", ios::binary);
     if (!file) {
@@ -256,14 +259,15 @@ void writeToBinaryFile(Node* head) {
     }
     Node* temp = head;
     while (temp) {
-        size_t len1 = temp->phone.size();
-        size_t len2 = temp->adres.size();
+        size_t len1 = temp->getPhone().size();
+        size_t len2 = temp->getAdres().size();
         file.write((char*)&len1, sizeof(len1));
-        file.write(temp->phone.data(), len1);
+        file.write(temp->getPhone().data(), len1);
         file.write((char*)&len2, sizeof(len2));
-        file.write(temp->adres.data(), len2);
-        file.write((char*)&temp->square, sizeof(temp->square));
-        temp = temp->next;
+        file.write(temp->getAdres().data(), len2);
+        float sq = temp->getSquare();
+        file.write((char*)&sq, sizeof(sq));
+        temp = temp->getNext();
     }
     cout << "Written to binary.\n";
 }
@@ -274,20 +278,20 @@ int main() {
 
     while (true) {
         cout << "\nMenu:\n"
-             << "2) Enter elements\n"
-             << "3) Search element\n"
-             << "4) Sort list\n"
-             << "5) Edit element\n"
-             << "6) Add to end\n"
-             << "7) Delete element\n"
-             << "8) Insert element\n"
-             << "9) Write binary\n"
-             << "10) Read binary\n"
-             << "11) Write text\n"
-             << "12) Read text\n"
-             << "13) Print list\n"
-             << "14) Free memory\n"
-             << "15) Exit\n"
+             << "1) Enter elements\n"
+             << "2) Search element\n"
+             << "3) Sort list\n"
+             << "4) Edit element\n"
+             << "5) Add to end\n"
+             << "6) Delete element\n"
+             << "7) Insert element\n"
+             << "8) Write binary\n"
+             << "9) Read binary\n"
+             << "10) Write text\n"
+             << "11) Read text\n"
+             << "12) Print list\n"
+             << "13) Free memory\n"
+             << "14) Exit\n"
              << "Choice: ";
         cin >> choice;
 
