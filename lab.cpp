@@ -12,10 +12,11 @@ private:
     Node* next;
 
 public:
+    // Инициализирует поля phone, adres, square и устанавливает next в nullptr
     Node(const string& phone, const string& adres, float square)
         : phone(phone), adres(adres), square(square), next(nullptr) {}
 
-    // --- getters & setters ---
+    // --- Геттеры (методы для получения значений полей) ---
     string getPhone() const { return phone; }
     string getAdres() const { return adres; }
     float getSquare() const { return square; }
@@ -28,6 +29,7 @@ public:
 };
 
 // --- Функции работы со списком ---
+
 void append(Node*& head, const string& phone, const string& adres, float square) {
     Node* newNode = new Node(phone, adres, square);
     if (!head) {
@@ -99,7 +101,7 @@ void enterElements(Node*& head) {
         float square;
         cout << "Phone: ";
         cin >> phone;
-        cin.ignore();
+        cin.ignore(); // игнорируем символ новой строки после ввода phone, чтобы getline работал корректно
         cout << "Adres: ";
         getline(cin, adres);
         cout << "Square: ";
@@ -229,48 +231,8 @@ void insertElement(Node*& head) {
     temp->setNext(newNode);
 }
 
-void readFromBinaryFile(Node*& head) {
-    ifstream file("list.bin", ios::binary);
-    if (!file) {
-        cout << "Error opening file\n";
-        return;
-    }
-    string phone, adres;
-    float square;
-    while (true) {
-        size_t len1, len2;
-        if (!file.read((char*)&len1, sizeof(len1))) break;
-        phone.resize(len1);
-        file.read(&phone[0], len1);
-        file.read((char*)&len2, sizeof(len2));
-        adres.resize(len2);
-        file.read(&adres[0], len2);
-        file.read((char*)&square, sizeof(square));
-        append(head, phone, adres, square);
-    }
-    cout << "Read from binary.\n";
-}
 
-void writeToBinaryFile(Node* head) {
-    ofstream file("list.bin", ios::binary);
-    if (!file) {
-        cout << "Error opening file\n";
-        return;
-    }
-    Node* temp = head;
-    while (temp) {
-        size_t len1 = temp->getPhone().size();
-        size_t len2 = temp->getAdres().size();
-        file.write((char*)&len1, sizeof(len1));
-        file.write(temp->getPhone().data(), len1);
-        file.write((char*)&len2, sizeof(len2));
-        file.write(temp->getAdres().data(), len2);
-        float sq = temp->getSquare();
-        file.write((char*)&sq, sizeof(sq));
-        temp = temp->getNext();
-    }
-    cout << "Written to binary.\n";
-}
+
 
 int main() {
     Node* head = nullptr;
@@ -285,8 +247,6 @@ int main() {
              << "5) Add to end\n"
              << "6) Delete element\n"
              << "7) Insert element\n"
-             << "8) Write binary\n"
-             << "9) Read binary\n"
              << "10) Write text\n"
              << "11) Read text\n"
              << "12) Print list\n"
@@ -303,8 +263,6 @@ int main() {
             case 5: addToEnd(head); break;
             case 6: deleteElement(head); break;
             case 7: insertElement(head); break;
-            case 8: writeToBinaryFile(head); break;
-            case 9: readFromBinaryFile(head); break;
             case 10: writeToTextFile(head); break;
             case 11: readFromTextFile(head); break;
             case 12: printList(head); break;
